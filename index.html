@@ -3,70 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Library Home</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Royce's Drip Merch E-store</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS -->
 </head>
 <body>
 
 <header>
-    <h1>Digital Library</h1>
-    <div class="profile">
-        <a href="profile.html">
-            <img src="DP.jpg" alt="Profile Picture" class="profile-pic">
-            <span class="profile-name">Takudzwa Chingwa</span>
-        </a>
-    </div>
+    <h1>ROYCE Drip Merch</h1>
+    <button id="cart-button">View Cart (0)</button>
 </header>
 
-<nav>
-    <a href="index.html">Home</a>
-    <a href="books.html">Books</a>
-</nav>
+<div class="container" id="product-list">
+    <!-- Products will be injected here by JavaScript -->
+</div>
 
-<div class="container">
-    <h2>Recommended Books</h2>
-    <div class="book-list">
-        <div class="book-item">
-            <a href="book1.html">
-                <img src="ventures.jpg" alt="Book 1">
-                <p>Ventures Grade 7</p>
-            </a>
-        </div>
-        <div class="book-item">
-            <a href="book2.html">
-                <img src="new3.jpeg?raw=true" alt="Book 2">
-                <p> New General Mathematics Book 3</p>
-            </a>
-        </div>
-        <!-- Add more recommended books as needed -->
-    </div>
-
-    <h2>Recently Added Books</h2>
-    <div class="book-list">
-        <div class="book-item">
-            <a href="book1.html">
-                <img src="buk2.jpeg" alt="Book 1">
-                <p> New General Mathematics Book 4</p>
-            </a>
-        </div>
-        <!-- Add more recently added books -->
-    </div>
-
-    <h2>Recently Returned Books</h2>
-    <div class="book-list">
-        <div class="book-item">
-            <a href="book2.html">
-                <img src="1984.jpg" alt="Book 2">
-                <p>1984</p>
-            </a>
-        </div>
-        <!-- Add more recently returned books -->
-    </div>
+<div class="cart-container" id="cart-container" style="display: none;">
+    <h2>Your Cart</h2>
+    <ul id="cart-items"></ul>
+    <p>Total: $<span id="total-price">0.00</span></p>
+    <button id="checkout-button">Checkout</button>
+    <button id="close-cart-button">Close</button>
 </div>
 
 <footer>
-    <p>&copy; 2024 Digital Library</p>
+    <p>&copy; ROYCE E-COMMERCE STORE 2024</p>
 </footer>
+
+<script>
+    const products = [
+        {
+            name: "Cactus Jack T-Shirt",
+            price: 49.99,
+            image: "https://github.com/Royce-Tinofara/Royce-s-Drip-Mecrh-Website/raw/main/Merch/cactus%20Jack.jpg",
+            category: "Clothing"
+        },
+        {
+            name: "Travis Scott T-Shirt",
+            price: 39.99,
+            image: "https://github.com/Royce-Tinofara/Royce-s-Drip-Mecrh-Website/raw/main/Merch/Travis%20scott.jpg",
+            category: "Clothing"
+        },
+        {
+            name: "Spongebob Bottle",
+            price: 3.99,
+            image: "https://github.com/Royce-Tinofara/Royce-s-Drip-Mecrh-Website/raw/main/Merch/Spongebob%20bottle.jpg",
+            category: "Accessories"
+        },
+        {
+            name: "Rick n Morty Bottle",
+            price: 4.99,
+            image: "https://github.com/Royce-Tinofara/Royce-s-Drip-Mecrh-Website/raw/main/Merch/Rick%20n%20morty%20Bottle.jpg",
+            category: "Accessories"
+        },
+        // Add more products with categories
+    ];
+
+    let cart = [];
+    const productList = document.getElementById('product-list');
+    const cartButton = document.getElementById('cart-button');
+    const cartContainer = document.getElementById('cart-container');
+    const cartItemsList = document.getElementById('cart-items');
+    const totalPriceElement = document.getElementById('total-price');
+
+    // Filter products by category and display
+    function displayProducts(category) {
+        productList.innerHTML = '';
+        products.filter(product => product.category === category).forEach(product => {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product';
+            productDiv.innerHTML = `
+                <img src="${product.image}" alt="${product.name}">
+                <h2>${product.name}</h2>
+                <p>Price: $${product.price.toFixed(2)}</p>
+                <input type="number" id="qty-${product.name.replace(/\s/g, '-')}" value="1" min="1" style="width: 50px;">
+                <button onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
+            `;
+            productList.appendChild(productDiv);
+        });
+    }
+
+    // Initial display of all products
+    displayProducts('All');
+
+    function addToCart(productName, price) {
+        const qtyInput = document.getElementById(`qty-${productName.replace(/\s/g, '-')}`);
+        const quantity = parseInt(qtyInput.value);
+        
+        const existingProduct = cart.find(item => item.productName === productName);
+        if (existingProduct) {
+            existingProduct.quantity += quantity;
+        } else {
+            cart.push({ productName, price, quantity });
+        }
+        
+        updateCart();
+        alert(`${productName} (x${quantity}) has been added to your cart.`);
+    }
+
+    function updateCart() {
+        const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+        cartButton.innerText = `View Cart (${cartCount})`;
+        
+        // Update cart display
+        cartItemsList.innerHTML = '';
+        let total = 0;
+        cart.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.productName} - $${item.price.toFixed(2)} x ${item.quantity}`;
+            cartItemsList.appendChild(li);
+            total += item.price * item.quantity;
+        });
+        totalPriceElement.textContent = total.toFixed(2);
+    }
+
+    cartButton.onclick = () => {
+        cartContainer.style.display = 'block';
+    };
+
+    document.getElementById('close-cart-button').onclick = () => {
+        cartContainer.style.display = 'none';
+    };
+
+    document.getElementById('checkout-button').onclick = () => {
+        alert('Checkout successful! Your total is $' + totalPriceElement.textContent);
+        cart = [];
+        updateCart();
+        cartContainer.style.display = 'none';
+    };
+</script>
 
 </body>
 </html>
